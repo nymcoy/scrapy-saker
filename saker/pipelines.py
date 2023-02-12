@@ -39,13 +39,15 @@ class SakerArticlePipeline:
             return item #ignore non-SakerArticleItems
 
         content = item['content']
-        article = Selector(text=content)
         #fix image links
         for img in item['images']:
+            article = Selector(text=content)
             img_path = self.img_dir_rel + '/' + img['path']
             img_tag = article.css(f'img[data-src="{img["url"]}"]')
             if not img_tag:
                 img_tag = article.css(f'img[data-src="{urllib.parse.unquote(img["url"])}"]')
+            if not img_tag:
+                continue
             old_img_src = img_tag.css('::attr(src)').get()
             new_img_tag = re.sub('data-(src|srcset|sizes)="[^"]*"', '', img_tag.get()).replace(old_img_src, img_path)
             content = content.replace(img_tag.get(), new_img_tag)

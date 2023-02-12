@@ -1,6 +1,7 @@
 import scrapy
 import re
 from ..items import SakerArticleItem
+from scrapy import Selector
 
 class VineyardSpider(scrapy.Spider):
     name = 'vineyard'
@@ -60,6 +61,8 @@ class VineyardSpider(scrapy.Spider):
             a_html = a_html.replace(pc.get(),'')
         
         article['content'] = a_html
+        article['image_urls'] = Selector(text=a_html).css('img::attr(data-src)').getall()
+        article['image_urls'] = [x for x in article['image_urls'] if x]
 
         article['tags'] = response.css('article div.tag-list ul li a::text').getall()
         
